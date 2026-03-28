@@ -17,9 +17,7 @@ public class GitCommitTool : EditorWindow
     {
         GUILayout.Label("Commit Mesaji:", EditorStyles.boldLabel);
         commitMessage = EditorGUILayout.TextArea(commitMessage, GUILayout.Height(60));
-
         GUILayout.Space(10);
-
         if (GUILayout.Button("Commit & Push", GUILayout.Height(40)))
         {
             if (string.IsNullOrEmpty(commitMessage))
@@ -34,12 +32,10 @@ public class GitCommitTool : EditorWindow
     void RunGitCommitPush(string message)
     {
         string repoPath = Path.GetFullPath(Application.dataPath + "/..");
-
         RunGit("add .", repoPath);
         RunGit($"commit -m \"{message}\"", repoPath);
-        string pushResult = RunGit("push origin main", repoPath);
-
-        EditorUtility.DisplayDialog("Git Push", "Push tamamlandi!\n\n" + pushResult, "OK");
+        string result = RunGit("push origin main", repoPath);
+        EditorUtility.DisplayDialog("Git Push", "Push tamamlandi!\n\n" + result, "OK");
         commitMessage = "";
     }
 
@@ -53,13 +49,11 @@ public class GitCommitTool : EditorWindow
             UseShellExecute = false,
             CreateNoWindow = true
         };
-
         using var p = Process.Start(psi);
         string output = p.StandardOutput.ReadToEnd();
         string error  = p.StandardError.ReadToEnd();
         p.WaitForExit();
-
-        UnityEngine.Debug.Log($"[Git] {args}\n{output}{error}");
+        Debug.Log($"[Git] {args}\n{output}{error}");
         return output + error;
     }
 }
