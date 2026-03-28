@@ -53,7 +53,7 @@ public class GitCommitTool : EditorWindow
         string output = p.StandardOutput.ReadToEnd();
         string error  = p.StandardError.ReadToEnd();
         p.WaitForExit();
-        Debug.Log($"[Git] {args}\n{output}{error}");
+        UnityEngine.Debug.Log($"[Git] {args}\n{output}{error}");
         return output + error;
     }
 }
