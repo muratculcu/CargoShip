@@ -148,7 +148,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6df78bc7b60f11f4093719021cd9f679, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ContainerSpawner
-  containerTypes: []
+  containerTypes:
+  - {fileID: 11400000, guid: 7d60fdc971a01a94d8c89a75fc06f45f, type: 2}
+  - {fileID: 11400000, guid: 7649d149671bbc04885cd70b9083f7ad, type: 2}
+  - {fileID: 11400000, guid: 0c6469e3bb78eb342b1858f0ee04d346, type: 2}
+  - {fileID: 11400000, guid: 92440c4ebeba03e49b41fb29f4605cbe, type: 2}
+  - {fileID: 11400000, guid: 657ecc2ab75e2da4d80f68c9c765491a, type: 2}
+  - {fileID: 11400000, guid: 2c30e59cea01b3e4da557088d9d075bd, type: 2}
+  - {fileID: 11400000, guid: bc12aad767c7f7b4282e0014f9bc2d3e, type: 2}
 --- !u!4 &693550141
 Transform:
   m_ObjectHideFlags: 0
@@ -534,6 +541,102 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1611200322
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1611200324}
+  - component: {fileID: 1611200323}
+  m_Layer: 0
+  m_Name: GameStarter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1611200323
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1611200322}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f4943d612f974742af31ac7bb180865, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameStarter
+  containerController: {fileID: 1840516032}
+  containerSpawner: {fileID: 693550140}
+  containerPrefab: {fileID: 8618195050294729884, guid: 29ed9a32925ed6e458c50ac118601651, type: 3}
+--- !u!4 &1611200324
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1611200322}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0, y: 0, z: -0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1840516031
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1840516033}
+  - component: {fileID: 1840516032}
+  m_Layer: 0
+  m_Name: ContainerController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1840516032
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1840516031}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a548ad4ef6a525d47904e1f24e7b1ce5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ContainerController
+  shipGrid: {fileID: 1517919912}
+  weightManager: {fileID: 941491986}
+  moveInterval: 0.15
+  fastDropSpeed: 0.05
+  normalDropSpeed: 0.8
+--- !u!4 &1840516033
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1840516031}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0, y: 0, z: -0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -545,3 +648,5 @@ SceneRoots:
   - {fileID: 941491987}
   - {fileID: 881008714}
   - {fileID: 693550141}
+  - {fileID: 1840516033}
+  - {fileID: 1611200324}
