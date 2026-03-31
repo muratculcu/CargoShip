@@ -1,39 +1,51 @@
 ﻿using UnityEngine;
+using System;
 
 public class ContainerController : MonoBehaviour
 {
     [Header("References")]
-    public ShipGrid      shipGrid;
+    public ShipGrid shipGrid;
     public WeightManager weightManager;
 
     [Header("Settings")]
-    public float moveInterval    = 0.15f;
-    public float fastDropSpeed   = 0.05f;
+    public float moveInterval = 0.15f;
+    public float fastDropSpeed = 0.05f;
     public float normalDropSpeed = 0.8f;
 
+    public Action OnContainerPlaced;
+
     private ContainerData currentData;
-    private GameObject    currentVisual;
-    private Vector2Int    gridPos;
-    private Vector2Int    currentSize;
-    private float         dropTimer;
-    private float         dropSpeed;
-    private float         moveTimer;
-    private bool          isActive;
-    private int           undoCount = 3;
+    private GameObject currentVisual;
+    private GameObject containerPrefab;
+    private Vector2Int gridPos;
+    private Vector2Int currentSize;
+    private float dropTimer;
+    private float dropSpeed;
+    private float moveTimer;
+    private bool isActive;
+    private int undoCount = 3;
 
     public int UndoCount => undoCount;
 
-    public void SpawnContainer(ContainerData data, GameObject prefab)
-    {
-        currentData   = data;
-        currentSize   = data.size;
-        gridPos       = new Vector2Int((shipGrid.width - currentSize.x) / 2, shipGrid.height - 1);
-        dropSpeed     = normalDropSpeed;
-        isActive      = true;
-        dropTimer     = 0f;
+    public void SetPrefab(GameObject prefab) => containerPrefab = prefab;
 
-        if (currentVisual) Destroy(currentVisual);
-        currentVisual = Instantiate(prefab, GridToWorld(gridPos), Quaternion.identity);
+    public void SpawnContainer(ContainerData data)
+    {
+        currentData = data;
+        currentSize = data.size;
+        gridPos = new Vector2Int((shipGrid.width - currentSize.x) / 2, shipGrid.height - 1);
+        dropSpeed = normalDropSpeed;
+        isActive = true;
+        dropTimer = 0f;
+
+        // Eskiyi silme! Sadece yeni visual olustur
+        currentVisual = Instantiate(containerPrefab);
+        currentVisual.transform.localScale = new Vector3(currentSize.x, currentSize.y, 1f);
+
+        var rend = currentVisual.GetComponent<Renderer>();
+        if (rend != null) rend.material.color = data.color;
+
+        currentVisual.transform.position = GridToWorld(gridPos);
     }
 
     void Update()
@@ -46,43 +58,36 @@ public class ContainerController : MonoBehaviour
     void HandleInput()
     {
         moveTimer -= Time.deltaTime;
-
-        if (Input.GetKey(KeyCode.LeftArrow)  && moveTimer <= 0) MoveLeft();
+        if (Input.GetKey(KeyCode.LeftArrow) && moveTimer <= 0) MoveLeft();
         if (Input.GetKey(KeyCode.RightArrow) && moveTimer <= 0) MoveRight();
-        if (Input.GetKeyDown(KeyCode.UpArrow))                  Rotate();
-        if (Input.GetKey(KeyCode.DownArrow))  dropSpeed = fastDropSpeed;
-        else                                  dropSpeed = normalDropSpeed;
-        if (Input.GetKeyDown(KeyCode.Space))  HardDrop();
+        if (Input.GetKeyDown(KeyCode.UpArrow)) Rotate();
+        if (Input.GetKey(KeyCode.DownArrow)) dropSpeed = fastDropSpeed;
+        else dropSpeed = normalDropSpeed;
+        if (Input.GetKeyDown(KeyCode.Space)) HardDrop();
     }
 
     void MoveLeft()
     {
         var next = gridPos + Vector2Int.left;
         if (shipGrid.CanPlace(next, currentSize))
-        {
-            gridPos = next; UpdateVisual(); moveTimer = moveInterval;
-        }
+        { gridPos = next; UpdateVisual(); moveTimer = moveInterval; }
     }
 
     void MoveRight()
     {
         var next = gridPos + Vector2Int.right;
         if (shipGrid.CanPlace(next, currentSize))
-        {
-            gridPos = next; UpdateVisual(); moveTimer = moveInterval;
-        }
+        { gridPos = next; UpdateVisual(); moveTimer = moveInterval; }
     }
 
     void Rotate()
     {
-        var rotated  = new Vector2Int(currentSize.y, currentSize.x);
+        var rotated = new Vector2Int(currentSize.y, currentSize.x);
         var adjusted = new Vector2Int(
-            Mathf.Clamp(gridPos.x, 0, shipGrid.width  - rotated.x),
+            Mathf.Clamp(gridPos.x, 0, shipGrid.width - rotated.x),
             Mathf.Clamp(gridPos.y, 0, shipGrid.height - rotated.y));
         if (shipGrid.CanPlace(adjusted, rotated))
-        {
-            currentSize = rotated; gridPos = adjusted; UpdateVisual();
-        }
+        { currentSize = rotated; gridPos = adjusted; UpdateVisual(); }
     }
 
     void HardDrop()
@@ -97,7 +102,7 @@ public class ContainerController : MonoBehaviour
         if (dropTimer > 0) return;
         dropTimer = dropSpeed;
         if (CanMoveDown()) { gridPos += Vector2Int.down; UpdateVisual(); }
-        else               PlaceContainer();
+        else PlaceContainer();
     }
 
     bool CanMoveDown()
@@ -109,16 +114,19 @@ public class ContainerController : MonoBehaviour
     void PlaceContainer()
     {
         isActive = false;
+
+        // Gorseli tam pozisyona kilitle, silme!
+        if (currentVisual)
+            currentVisual.transform.position = GridToWorld(gridPos);
+
+        currentVisual = null; // Referansi birak ama sahneyi sil
+
         shipGrid.Place(gridPos, currentSize);
         weightManager.RegisterContainer(gridPos, currentSize, currentData.weight);
-
-        if (currentVisual) Destroy(currentVisual);
-        currentVisual = null;
-
         ScoreManager.Instance?.AddScore(Mathf.RoundToInt(currentData.weight * 10));
-        ContainerSpawner.Instance?.Advance();
 
         Debug.Log($"[ContainerController] Placed at {gridPos} size {currentSize}");
+        OnContainerPlaced?.Invoke();
     }
 
     public bool TryUndo()
@@ -126,7 +134,6 @@ public class ContainerController : MonoBehaviour
         if (undoCount <= 0 || isActive) return false;
         weightManager.RemoveLastContainer();
         undoCount--;
-        Debug.Log($"[ContainerController] Undo! Kalan: {undoCount}");
         return true;
     }
 

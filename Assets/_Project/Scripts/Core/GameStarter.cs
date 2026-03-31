@@ -5,9 +5,13 @@ public class GameStarter : MonoBehaviour
     [Header("References")]
     public ContainerController containerController;
     public ContainerSpawner containerSpawner;
+    public TimerController timerController;
 
-    [Header("Test Prefab")]
+    [Header("Prefab")]
     public GameObject containerPrefab;
+
+    [Header("Settings")]
+    public float totalTime = 90f;
 
     void Start()
     {
@@ -17,6 +21,7 @@ public class GameStarter : MonoBehaviour
             return;
         }
 
+        // Kamerayı ayarla
         var cam = Camera.main;
         if (cam != null)
         {
@@ -27,27 +32,39 @@ public class GameStarter : MonoBehaviour
             cam.orthographicSize = 7f;
         }
 
+        // Prefab'i controller'a ver
+        containerController.SetPrefab(containerPrefab);
+
+        // Event'i baglat
+        containerController.OnContainerPlaced = SpawnNext;
+
+        // Timer baslat
+        if (timerController != null)
+        {
+            timerController.startTime = totalTime;
+            timerController.OnTimeUp += OnTimeUp;
+            timerController.StartTimer();
+        }
+
+        // Ilk konteyneri spawn et
         SpawnNext();
     }
 
-    public void SpawnNext()
+    void SpawnNext()
     {
+        containerSpawner.Advance();
         if (containerSpawner.Current == null)
         {
-            Debug.LogError("[GameStarter] ContainerSpawner.Current null!");
+            Debug.LogError("[GameStarter] Current null!");
             return;
         }
+        containerController.SpawnContainer(containerSpawner.Current);
+        Debug.Log($"[GameStarter] {containerSpawner.Current.containerName} spawn edildi!");
+    }
 
-        var data = containerSpawner.Current;
-        var go = Instantiate(containerPrefab);
-
-        // Boyut ve renk ayarla
-        go.transform.localScale = new Vector3(data.size.x, data.size.y, 1f);
-
-        var rend = go.GetComponent<Renderer>();
-        if (rend != null) rend.material.color = data.color;
-
-        containerController.SpawnContainer(data, go);
-        Debug.Log($"[GameStarter] {data.containerName} spawn edildi! Renk:{data.color}");
+    void OnTimeUp()
+    {
+        Debug.Log("[GameStarter] Sure doldu!");
+        GameManager.Instance?.EndGame();
     }
 }
