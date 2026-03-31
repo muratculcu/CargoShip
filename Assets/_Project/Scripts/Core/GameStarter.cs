@@ -4,7 +4,7 @@ public class GameStarter : MonoBehaviour
 {
     [Header("References")]
     public ContainerController containerController;
-    public ContainerSpawner    containerSpawner;
+    public ContainerSpawner containerSpawner;
 
     [Header("Test Prefab")]
     public GameObject containerPrefab;
@@ -17,15 +17,14 @@ public class GameStarter : MonoBehaviour
             return;
         }
 
-        // Kamerayı grid merkezine odakla
         var cam = Camera.main;
         if (cam != null)
         {
-            float midX = containerController.shipGrid.width  / 2f;
+            float midX = containerController.shipGrid.width / 2f;
             float midY = containerController.shipGrid.height / 2f;
             cam.transform.position = new Vector3(midX, midY, -15f);
             cam.orthographic = true;
-            cam.orthographicSize = 8f;
+            cam.orthographicSize = 7f;
         }
 
         SpawnNext();
@@ -38,7 +37,17 @@ public class GameStarter : MonoBehaviour
             Debug.LogError("[GameStarter] ContainerSpawner.Current null!");
             return;
         }
-        containerController.SpawnContainer(containerSpawner.Current, containerPrefab);
-        Debug.Log("[GameStarter] Konteyner spawn edildi!");
+
+        var data = containerSpawner.Current;
+        var go = Instantiate(containerPrefab);
+
+        // Boyut ve renk ayarla
+        go.transform.localScale = new Vector3(data.size.x, data.size.y, 1f);
+
+        var rend = go.GetComponent<Renderer>();
+        if (rend != null) rend.material.color = data.color;
+
+        containerController.SpawnContainer(data, go);
+        Debug.Log($"[GameStarter] {data.containerName} spawn edildi! Renk:{data.color}");
     }
 }
