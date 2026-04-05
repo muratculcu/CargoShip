@@ -21,24 +21,10 @@ public class GameStarter : MonoBehaviour
             return;
         }
 
-        // Kamerayı ayarla
-        var cam = Camera.main;
-        if (cam != null)
-        {
-            float midX = containerController.shipGrid.width / 2f;
-            float midY = containerController.shipGrid.height / 2f;
-            cam.transform.position = new Vector3(midX, midY, -15f);
-            cam.orthographic = true;
-            cam.orthographicSize = 7f;
-        }
-
-        // Prefab'i controller'a ver
+        SetupIsometricCamera();
         containerController.SetPrefab(containerPrefab);
-
-        // Event'i baglat
         containerController.OnContainerPlaced = SpawnNext;
 
-        // Timer baslat
         if (timerController != null)
         {
             timerController.startTime = totalTime;
@@ -46,18 +32,28 @@ public class GameStarter : MonoBehaviour
             timerController.StartTimer();
         }
 
-        // Ilk konteyneri spawn et
         SpawnNext();
+    }
+
+    void SetupIsometricCamera()
+    {
+        var cam = Camera.main;
+        if (cam == null) return;
+
+        float midX = containerController.shipGrid.width / 2f;
+        float midZ = containerController.shipGrid.height / 2f;
+
+        // Izometrik pozisyon: yukari ve arkadan bak
+        cam.transform.position = new Vector3(midX, 18f, -10f);
+        cam.transform.rotation = Quaternion.Euler(45f, 0f, 0f);
+        cam.orthographic = false;
+        cam.fieldOfView = 50f;
     }
 
     void SpawnNext()
     {
         containerSpawner.Advance();
-        if (containerSpawner.Current == null)
-        {
-            Debug.LogError("[GameStarter] Current null!");
-            return;
-        }
+        if (containerSpawner.Current == null) return;
         containerController.SpawnContainer(containerSpawner.Current);
         Debug.Log($"[GameStarter] {containerSpawner.Current.containerName} spawn edildi!");
     }

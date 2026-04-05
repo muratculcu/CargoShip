@@ -11,6 +11,7 @@ public class ContainerController : MonoBehaviour
     public float moveInterval = 0.15f;
     public float fastDropSpeed = 0.05f;
     public float normalDropSpeed = 0.8f;
+    public float containerDepth = 2.5f;
 
     public Action OnContainerPlaced;
 
@@ -38,9 +39,11 @@ public class ContainerController : MonoBehaviour
         isActive = true;
         dropTimer = 0f;
 
-        // Eskiyi silme! Sadece yeni visual olustur
         currentVisual = Instantiate(containerPrefab);
-        currentVisual.transform.localScale = new Vector3(currentSize.x, currentSize.y, 1f);
+
+        // 3D boyut: x=genislik, y=yukseklik, z=derinlik
+        currentVisual.transform.localScale =
+            new Vector3(currentSize.x * 0.95f, currentSize.y * 0.95f, containerDepth);
 
         var rend = currentVisual.GetComponent<Renderer>();
         if (rend != null) rend.material.color = data.color;
@@ -114,17 +117,13 @@ public class ContainerController : MonoBehaviour
     void PlaceContainer()
     {
         isActive = false;
-
-        // Gorseli tam pozisyona kilitle, silme!
         if (currentVisual)
             currentVisual.transform.position = GridToWorld(gridPos);
-
-        currentVisual = null; // Referansi birak ama sahneyi sil
+        currentVisual = null;
 
         shipGrid.Place(gridPos, currentSize);
         weightManager.RegisterContainer(gridPos, currentSize, currentData.weight);
         ScoreManager.Instance?.AddScore(Mathf.RoundToInt(currentData.weight * 10));
-
         Debug.Log($"[ContainerController] Placed at {gridPos} size {currentSize}");
         OnContainerPlaced?.Invoke();
     }
@@ -143,6 +142,10 @@ public class ContainerController : MonoBehaviour
             currentVisual.transform.position = GridToWorld(gridPos);
     }
 
+    // Z ekseninde ortala (deckDepth / 2)
     Vector3 GridToWorld(Vector2Int pos) =>
-        new Vector3(pos.x + currentSize.x * 0.5f, pos.y + currentSize.y * 0.5f, 0f);
+        new Vector3(
+            pos.x + currentSize.x * 0.5f,
+            pos.y + currentSize.y * 0.5f,
+            containerDepth / 2f);
 }
